@@ -1,0 +1,4 @@
+/scrapper/celerybeat-schedule
+/.idea/
+__pycache__/
+/webApp/db.sqlite3
