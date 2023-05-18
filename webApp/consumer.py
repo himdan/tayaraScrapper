@@ -1,26 +1,11 @@
-import pika, sys, os
+import sys
+import os
+from tayara_stats.services import insert_result_consumer
+from tayara_stats.message_handlers import handle_log
 
 
 def main():
-    url = os.environ.get('MESSAGE_BROKER_DSN', 'amqp://guest:guest@broker:5672/%2f')
-    # print('broker url {}'.format(url))
-    params = pika.URLParameters(url)
-    connection = pika.BlockingConnection(params)
-    channel = connection.channel()
-
-    channel.queue_declare(queue='insert_single_result')
-
-    channel.exchange_declare(exchange='insert_single_result', exchange_type='direct')
-
-    def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
-
-    channel.queue_bind(queue='insert_single_result', exchange='insert_single_result',
-                       routing_key='insert_single_result')
-    channel.basic_consume(queue='insert_single_result', on_message_callback=callback, auto_ack=True)
-
-    print(' [*] Waiting for messages. To exit press CTRL+C')
-    channel.start_consuming()
+    insert_result_consumer.consume(callback=handle_log)
 
 
 if __name__ == '__main__':

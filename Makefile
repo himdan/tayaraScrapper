@@ -6,5 +6,7 @@ scrapper_build:
 
 scrapper_start:
 	docker-compose exec -it scarpper bash -c "celery -A tasks worker -B"
+scrapper_force_start:
+	docker-compose exec -it scarpper bash -c "python main.py"
 webapp_build:
 	docker build ./webApp -t python-web

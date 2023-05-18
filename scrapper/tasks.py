@@ -8,9 +8,9 @@ import time
 
 app = Celery('tasks', broker='pyamqp://guest:guest@broker//')
 
+
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
-
     # Executes every Monday morning at 7:30 a.m.
     sender.add_periodic_task(
         crontab(hour=23, minute=56),
@@ -18,18 +18,16 @@ def setup_periodic_tasks(sender, **kwargs):
     )
 
 
-
-
 def _handle_search_result(_result: Any):
     print(_result)
     result_topic.send(_result)
 
-def _handle_search_results(_results: List[Any], record_count: int)->int:
-    for k,result in enumerate(_results):
+
+def _handle_search_results(_results: List[Any], record_count: int) -> int:
+    for k, result in enumerate(_results):
         _handle_search_result(result)
         record_count += 1
     return record_count
-
 
 
 @app.task
@@ -71,7 +69,3 @@ def scrap_tayara():
         print('-----await For Response--------')
         _backOff += 1
         time.sleep(_backOff * _backOffTime)
-
-
-
-
