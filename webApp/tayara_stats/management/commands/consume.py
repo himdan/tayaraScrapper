@@ -1,11 +1,15 @@
 from django.core.management.base import BaseCommand, CommandError
+from tayara_stats.message_handlers import handle_insert_result
+from tayara_stats.services import insert_result_consumer
 
 
 class Command(BaseCommand):
-    help = "Closes the specified poll for voting"
+    help = "start consumer"
 
     def add_arguments(self, parser):
-        parser.add_argument("poll_ids", nargs="+", type=int)
+        parser.add_argument("queue", type=str)
 
     def handle(self, *args, **options):
-        pass
+        insert_result_consumer.consume(
+            callback=handle_insert_result
+        )

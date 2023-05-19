@@ -1,4 +1,5 @@
 import pika
+from pika.adapters.blocking_connection import BlockingChannel
 import os
 
 
@@ -15,7 +16,7 @@ class Consumer:
         self._exchange = exchange
         self._exchange_type = exchange_type
         self._routing_key = routing_key
-        self._channel: pika.adapters.blocking_connection.BlockingChannel = None
+        self._channel: BlockingChannel = None
 
     def consume(self, callback, auto_ack=True):
         self._start()
@@ -41,3 +42,14 @@ insert_result_consumer = Consumer(
     exchange_type='direct',
     routing_key='insert_single_result'
 )
+
+
+def consumer_factory(broker_dsn=os.environ.get('MESSAGE_BROKER_DSN', 'amqp://guest:guest@broker:5672/%2f')):
+    def init(**kwargs):
+        inner = dict(broker_dsn=broker_dsn)
+        inner.update(kwargs)
+        return Consumer(
+            **inner
+        )
+
+    return init

@@ -1,4 +1,4 @@
 celery
 requests
 pika
-retry
+retry-requests

@@ -15,7 +15,7 @@ services:
     depends_on:
       broker:
         condition: service_healthy
-    command: "python consumer.py"
+    command: "python manage.py consume insert_single_result"
     volumes:
       - "./webApp:/home/app/site"
   web_app:

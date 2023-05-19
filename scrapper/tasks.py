@@ -1,10 +1,12 @@
-import requests
 import json
 from typing import Any, List
 from celery import Celery
 from celery.schedules import crontab
 from scrapper_common.producer import result_topic
 import time
+from retry_requests import Retry
+from requests import Session
+from requests.adapters import HTTPAdapter
 
 app = Celery('tasks', broker='pyamqp://guest:guest@broker//')
 
@@ -54,7 +56,13 @@ def scrap_tayara():
                                              "adParamsMap": {}, "rangeAdParamsMap": {}, "governorate": "",
                                              "delegation": [""], "minPrice": 0, "maxPrice": 0, "productTypeList": [],
                                              "level": 0, "state": 2}}, "withPremium": True}
-        response = requests.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
+        _session = Session()
+        _retries = Retry(
+            total=5,
+            status_forcelist=[429, 500, 502, 503, 504]
+        )
+        _session.mount('https://', HTTPAdapter(max_retries=_retries))
+        response = _session.post(url, data=json.dumps(data).encode('utf-8'), headers=headers)
         if response.status_code == 200:
             container = json.loads(response.content)
             total_records = container[0][1] if container[0][1] else 0
